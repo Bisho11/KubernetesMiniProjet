@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mpdatabase-service
+spec:
+  selector:
+    app: mpdatabase
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mpdatabase-statefulset
+spec:
+  replicas: 2
+  serviceName: mpdatabase
+  selector:
+    matchLabels:
+      app: mpdatabase
+  template:
+    metadata:
+      labels:
+        app: mpdatabase
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mpdatabase
+        image: mysql:latest
+        ports:
+        - containerPort: 3306
+          name: mysql-port
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: mpdatabase-configmap
+              key: database
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mpdatabase-secrets
+              key: password
+        volumeMounts:
+        - name: mpdatabase-storage
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mpdatabase-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi

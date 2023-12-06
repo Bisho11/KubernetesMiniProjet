@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mpbackend-service
+spec:
+  selector:
+    app: mpbackend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mpbackend-deployment
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mpbackend
+  template:
+    metadata:
+      labels:
+        app: mpbackend
+    spec:
+      containers:
+      - name: mpbackend
+        image: bisho11/miniprojetbackend:env2
+        ports:
+          - containerPort: 8080
+            name: backend-port
+        env:
+        - name: DATABASE_URL
+          valueFrom: 
+            configMapKeyRef: 
+              name: mpdatabase-configmap
+              key : url
+        - name: DATABASE_PASSWORD
+          valueFrom: 
+            secretKeyRef: 
+              name: mpdatabase-secrets
+              key : password          
