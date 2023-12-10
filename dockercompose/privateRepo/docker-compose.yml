@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  miniProjetdb:
+    image: mysql:latest
+    container_name: miniProjetdb
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: testdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysqlData:/var/lib/mysql
+    networks:
+      - miniProjetNetwork
+
+  mpbackend:
+    image: localhost:5000/backend
+    container_name: mpbackend
+    ports:
+      - "8081:8080"
+    depends_on:
+      - miniProjetdb
+    networks:
+      - miniProjetNetwork
+    restart: unless-stopped
+
+  mpfrontend:
+    image: localhost:5000/frontend
+    container_name: mpfrontend
+    ports:
+      - "8090:80"
+    depends_on:
+      - mpbackend
+    networks:
+      - miniProjetNetwork
+
+networks:
+  miniProjetNetwork:
+
+volumes:
+  mysqlData:

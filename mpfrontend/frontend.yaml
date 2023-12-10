@@ -27,7 +27,33 @@ spec:
     spec:
       containers:
       - name: mpfrontend
-        image: bisho11/miniprojetfrontend:latest
+        image: bisho11/miniprojetfrontend:prod
         ports:
           - containerPort: 80
             name: frontend-port
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        startupProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          failureThreshold: 5 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  minReadySeconds: 30
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 600
+  disruptionBudget:
+    maxUnavailable: 1

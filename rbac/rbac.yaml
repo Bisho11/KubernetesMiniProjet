@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: miniprojet
+  name: resource-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: miniprojet
+  name: read-resources-binding
+subjects:
+- kind: User 
+  name: dall49
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: resource-reader
+  apiGroup: rbac.authorization.k8s.io
